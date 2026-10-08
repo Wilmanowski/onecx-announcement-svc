@@ -74,13 +74,13 @@ public class AnnouncementDAO extends AbstractDAO<Announcement> {
                 predicates.add(
                         cb.lessThanOrEqualTo(root.get(Announcement_.END_DATE), criteria.getEndDateTo().toLocalDateTime()));
             }
-            if (criteria.getPriority() != null) {
+            if (criteria.getPriority() != null && !criteria.getPriority().isEmpty()) {
                 predicates.add(root.get(Announcement_.PRIORITY).in(criteria.getPriority()));
             }
-            if (criteria.getStatus() != null) {
+            if (criteria.getStatus() != null && !criteria.getStatus().isEmpty()) {
                 predicates.add(root.get(Announcement_.STATUS).in(criteria.getStatus()));
             }
-            if (criteria.getType() != null) {
+            if (criteria.getType() != null && !criteria.getType().isEmpty()) {
                 predicates.add(root.get(Announcement_.TYPE).in(criteria.getType()));
             }
             addSearchStringPredicate(predicates, cb, root.get(Announcement_.title), criteria.getTitle());

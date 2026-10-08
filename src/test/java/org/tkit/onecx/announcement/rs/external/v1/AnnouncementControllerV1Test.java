@@ -7,6 +7,7 @@ import static jakarta.ws.rs.core.Response.Status.OK;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.tkit.onecx.announcement.rs.v1.controller.AnnouncementControllerV1;
@@ -48,9 +49,9 @@ class AnnouncementControllerV1Test extends AbstractTest {
     void getAnnouncementsByCriteriaTest() {
         AnnouncementSearchCriteriaDTOV1 criteria = new AnnouncementSearchCriteriaDTOV1();
         criteria.setProductName("product2");
-        criteria.status(StatusDTOV1.ACTIVE);
-        criteria.setPriority(PriorityDTOV1.NORMAL);
-        criteria.setType(TypeDTOV1.EVENT);
+        criteria.setStatus(List.of(StatusDTOV1.ACTIVE));
+        criteria.setPriority(List.of(PriorityDTOV1.NORMAL));
+        criteria.setType(List.of(TypeDTOV1.EVENT));
         criteria.setStartDateFrom(OffsetDateTime.parse("2000-03-10T12:15:50-04:00"));
         criteria.setStartDateTo(OffsetDateTime.parse("2023-03-10T12:15:50-04:00"));
         criteria.setEndDateFrom(OffsetDateTime.parse("2000-03-10T12:15:50-04:00"));
@@ -73,6 +74,32 @@ class AnnouncementControllerV1Test extends AbstractTest {
     }
 
     @Test
+    void getAnnouncementsByMultipleSelectedFiltersTest() {
+        AnnouncementSearchCriteriaDTOV1 criteria = new AnnouncementSearchCriteriaDTOV1();
+        criteria.setStatus(List.of(StatusDTOV1.ACTIVE, StatusDTOV1.INACTIVE));
+        criteria.setType(List.of(TypeDTOV1.EVENT, TypeDTOV1.INFO));
+        criteria.setPriority(List.of(PriorityDTOV1.LOW, PriorityDTOV1.NORMAL));
+
+        var data = given()
+                .auth().oauth2(getKeycloakClientToken("testClient"))
+                .contentType(APPLICATION_JSON)
+                .body(criteria)
+                .post()
+                .then()
+                .statusCode(OK.getStatusCode())
+                .contentType(APPLICATION_JSON)
+                .extract()
+                .as(AnnouncementPageResultDTOV1.class);
+
+        assertThat(data.getTotalElements()).isEqualTo(4);
+        assertThat(data.getStream()).hasSize(4);
+        assertThat(data.getStream().stream().map(AnnouncementDTOV1::getStatus).toList())
+                .contains(StatusDTOV1.ACTIVE, StatusDTOV1.INACTIVE);
+        assertThat(data.getStream().stream().map(AnnouncementDTOV1::getType).toList())
+                .contains(TypeDTOV1.EVENT, TypeDTOV1.INFO);
+    }
+
+    @Test
     void getAnnouncementsByCriteriaNoBodyTest() {
         var data = given()
                 .auth().oauth2(getKeycloakClientToken("testClient"))
@@ -92,9 +119,9 @@ class AnnouncementControllerV1Test extends AbstractTest {
     void getAnnouncementsByCriteriaOrg1Test() {
         AnnouncementSearchCriteriaDTOV1 criteria = new AnnouncementSearchCriteriaDTOV1();
         criteria.setProductName("product2");
-        criteria.status(StatusDTOV1.ACTIVE);
-        criteria.setPriority(PriorityDTOV1.NORMAL);
-        criteria.setType(TypeDTOV1.EVENT);
+        criteria.setStatus(List.of(StatusDTOV1.ACTIVE));
+        criteria.setPriority(List.of(PriorityDTOV1.NORMAL));
+        criteria.setType(List.of(TypeDTOV1.EVENT));
         criteria.setStartDateFrom(OffsetDateTime.parse("2000-03-10T12:15:50-04:00"));
         criteria.setStartDateTo(OffsetDateTime.parse("2023-03-10T12:15:50-04:00"));
         criteria.setEndDateFrom(OffsetDateTime.parse("2000-03-10T12:15:50-04:00"));

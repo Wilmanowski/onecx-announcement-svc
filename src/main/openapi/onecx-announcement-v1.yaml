@@ -91,11 +91,17 @@ components:
       type: object
       properties:
         type:
-          $ref: '#/components/schemas/Type'
+          type: array
+          items:
+            $ref: '#/components/schemas/Type'
         priority:
-          $ref: '#/components/schemas/Priority'
+          type: array
+          items:
+            $ref: '#/components/schemas/Priority'
         status:
-          $ref: '#/components/schemas/Status'
+          type: array
+          items:
+            $ref: '#/components/schemas/Status'
         appearance:
           type: array
           items:

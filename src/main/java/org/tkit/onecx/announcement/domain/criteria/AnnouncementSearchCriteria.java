@@ -1,6 +1,7 @@
 package org.tkit.onecx.announcement.domain.criteria;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 import jakarta.validation.Valid;
 
@@ -15,11 +16,11 @@ import lombok.Setter;
 @RegisterForReflection
 public class AnnouncementSearchCriteria {
 
-    private Announcement.Type type;
+    private List<Announcement.Type> type;
 
-    private Announcement.Priority priority;
+    private List<Announcement.Priority> priority;
 
-    private Announcement.Status status;
+    private List<Announcement.Status> status;
 
     private @Valid OffsetDateTime startDateFrom;
 

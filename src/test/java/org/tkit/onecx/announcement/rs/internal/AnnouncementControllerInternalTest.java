@@ -49,6 +49,75 @@ class AnnouncementControllerInternalTest extends AbstractTest {
     }
 
     @Test
+    void getAnnouncementsByMultipleSelectedFiltersTest() {
+        AnnouncementSearchCriteriaDTO criteria = new AnnouncementSearchCriteriaDTO();
+        criteria.setStatus(List.of(AnnouncementStatusDTO.ACTIVE, AnnouncementStatusDTO.INACTIVE));
+        criteria.setType(List.of(AnnouncementTypeDTO.EVENT, AnnouncementTypeDTO.INFO));
+        criteria.setPriority(List.of(AnnouncementPriorityTypeDTO.LOW, AnnouncementPriorityTypeDTO.NORMAL));
+
+        var data = given()
+                .auth().oauth2(getKeycloakClientToken("testClient"))
+                .contentType(APPLICATION_JSON)
+                .body(criteria)
+                .post("search")
+                .then()
+                .statusCode(OK.getStatusCode())
+                .contentType(APPLICATION_JSON)
+                .extract()
+                .as(AnnouncementPageResultDTO.class);
+
+        Assertions.assertThat(data.getTotalElements()).isEqualTo(7);
+        Assertions.assertThat(data.getStream()).extracting(AnnouncementDTO::getId)
+                .containsExactlyInAnyOrder("a1", "a2", "a3", "a4", "a5", "a6", "a7");
+    }
+
+    @Test
+    void getAnnouncementsByEmptySelectedFiltersTest() {
+        AnnouncementSearchCriteriaDTO criteria = new AnnouncementSearchCriteriaDTO();
+        criteria.setStatus(List.of());
+        criteria.setType(List.of());
+        criteria.setPriority(List.of());
+
+        var data = given()
+                .auth().oauth2(getKeycloakClientToken("testClient"))
+                .contentType(APPLICATION_JSON)
+                .body(criteria)
+                .post("search")
+                .then()
+                .statusCode(OK.getStatusCode())
+                .contentType(APPLICATION_JSON)
+                .extract()
+                .as(AnnouncementPageResultDTO.class);
+
+        Assertions.assertThat(data.getTotalElements()).isEqualTo(7);
+        Assertions.assertThat(data.getStream()).hasSize(7);
+    }
+
+    @Test
+    void getAnnouncementsByCombinedSelectedFiltersTest() {
+        AnnouncementSearchCriteriaDTO criteria = new AnnouncementSearchCriteriaDTO();
+        criteria.setProductName("product2");
+        criteria.setStatus(List.of(AnnouncementStatusDTO.ACTIVE));
+        criteria.setType(List.of(AnnouncementTypeDTO.EVENT, AnnouncementTypeDTO.INFO));
+        criteria.setPriority(List.of(AnnouncementPriorityTypeDTO.LOW, AnnouncementPriorityTypeDTO.NORMAL));
+
+        var data = given()
+                .auth().oauth2(getKeycloakClientToken("testClient"))
+                .contentType(APPLICATION_JSON)
+                .body(criteria)
+                .post("search")
+                .then()
+                .statusCode(OK.getStatusCode())
+                .contentType(APPLICATION_JSON)
+                .extract()
+                .as(AnnouncementPageResultDTO.class);
+
+        Assertions.assertThat(data.getTotalElements()).isEqualTo(5);
+        Assertions.assertThat(data.getStream()).extracting(AnnouncementDTO::getId)
+                .containsExactlyInAnyOrder("a2", "a3", "a5", "a6", "a7");
+    }
+
+    @Test
     void searchAnnouncementBannersByCriteriaTest() {
         AnnouncementBannerSearchCriteriaDTO criteriaDTO = new AnnouncementBannerSearchCriteriaDTO();
         criteriaDTO.setCurrentDate(OffsetDateTime.parse("2023-03-10T12:15:50-04:00"));
@@ -110,9 +179,9 @@ class AnnouncementControllerInternalTest extends AbstractTest {
     void getAnnouncementsByCriteriaTest() {
         AnnouncementSearchCriteriaDTO criteria = new AnnouncementSearchCriteriaDTO();
         criteria.setProductName("product2");
-        criteria.status(AnnouncementStatusDTO.ACTIVE);
-        criteria.setPriority(AnnouncementPriorityTypeDTO.NORMAL);
-        criteria.setType(AnnouncementTypeDTO.EVENT);
+        criteria.setStatus(List.of(AnnouncementStatusDTO.ACTIVE));
+        criteria.setPriority(List.of(AnnouncementPriorityTypeDTO.NORMAL));
+        criteria.setType(List.of(AnnouncementTypeDTO.EVENT));
         criteria.setTitle("title2");
         criteria.setStartDateFrom(OffsetDateTime.parse("2000-03-10T12:15:50-04:00"));
         criteria.setStartDateTo(OffsetDateTime.parse("2023-03-10T12:15:50-04:00"));
@@ -369,9 +438,9 @@ class AnnouncementControllerInternalTest extends AbstractTest {
         AnnouncementSearchCriteriaDTO criteria = new AnnouncementSearchCriteriaDTO();
         criteria.setProductName("product2");
         criteria.setWorkspaceName("workspace2");
-        criteria.status(AnnouncementStatusDTO.ACTIVE);
-        criteria.setPriority(AnnouncementPriorityTypeDTO.NORMAL);
-        criteria.setType(AnnouncementTypeDTO.EVENT);
+        criteria.setStatus(List.of(AnnouncementStatusDTO.ACTIVE));
+        criteria.setPriority(List.of(AnnouncementPriorityTypeDTO.NORMAL));
+        criteria.setType(List.of(AnnouncementTypeDTO.EVENT));
         criteria.setStartDateFrom(OffsetDateTime.parse("2000-03-10T12:15:50-04:00"));
         criteria.setStartDateTo(OffsetDateTime.parse("2023-03-10T12:15:50-04:00"));
         criteria.setEndDateFrom(OffsetDateTime.parse("2000-03-10T12:15:50-04:00"));
