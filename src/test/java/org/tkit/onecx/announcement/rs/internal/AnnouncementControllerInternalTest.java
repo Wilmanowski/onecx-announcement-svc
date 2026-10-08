@@ -72,6 +72,27 @@ class AnnouncementControllerInternalTest extends AbstractTest {
     }
 
     @Test
+    void getAnnouncementsByNullSelectedFiltersTest() {
+        String criteria = """
+                {"status": null, "type": null, "priority": null}
+                """;
+
+        var data = given()
+                .auth().oauth2(getKeycloakClientToken("testClient"))
+                .contentType(APPLICATION_JSON)
+                .body(criteria)
+                .post("search")
+                .then()
+                .statusCode(OK.getStatusCode())
+                .contentType(APPLICATION_JSON)
+                .extract()
+                .as(AnnouncementPageResultDTO.class);
+
+        Assertions.assertThat(data.getTotalElements()).isEqualTo(7);
+        Assertions.assertThat(data.getStream()).hasSize(7);
+    }
+
+    @Test
     void getAnnouncementsByEmptySelectedFiltersTest() {
         AnnouncementSearchCriteriaDTO criteria = new AnnouncementSearchCriteriaDTO();
         criteria.setStatus(List.of());
